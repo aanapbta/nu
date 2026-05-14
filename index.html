@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consignado CLT — Análise de Reclamações UX · Ana Paula Batista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── AMBER SURRENDER PALETTE ─────────────────────────────────
+     #8B3B2A  deep terracotta (bg principal)
+     #E3CFA2  palha / creme (superfícies claras, texto)
+     #2C3320  verde-musgo escuro (superfícies escuras, contraste)
+     #CB4228  laranja-vermelho vivo (acento / ação)
+  ──────────────────────────────────────────────────────────── */
+  :root {
+    --bg:          #1e1208;          /* quase preto quente, base */
+    --surface:     #2e1a10;          /* terracotta escuro */
+    --surface2:    #3a2218;          /* terracotta médio */
+    --header-bg:   #8B3B2A;          /* terracotta principal */
+    --border:      #5a3020;
+    --accent:      #CB4228;          /* vermelho-laranja vivo */
+    --accent2:     #E3CFA2;          /* palha/creme */
+    --accent3:     #a0b870;          /* verde suave derivado */
+    --moss:        #2C3320;          /* musgo escuro */
+    --text:        #d4c4a8;          /* creme suavizado */
+    --text-dim:    #8a7060;
+    --text-bright: #F0E8D0;          /* creme claro */
+    --danger:      #CB4228;
+    --success:     #7a9840;
+    --tag-bg:      #3a2818;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────── */
+  header {
+    background: var(--header-bg);
+    border-bottom: 3px solid var(--accent);
+    padding: 2rem 0 0;
+  }
+
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .author-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .author-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #f5dfc0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .author-name::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: #f5dfc0;
+  }
+
+  .linkedin-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: #f5dfc0;
+    text-decoration: none;
+    border: 1px solid rgba(245,223,192,0.4);
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .linkedin-link:hover {
+    background: rgba(245,223,192,0.15);
+    border-color: #f5dfc0;
+  }
+
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f0d8b0;
+    margin-bottom: 0.6rem;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.4rem;
+    color: #fdf5e8;
+    line-height: 1.15;
+    margin-bottom: 0.4rem;
+  }
+
+  h1 em {
+    color: var(--accent2);
+    font-style: italic;
+  }
+
+  .subtitle {
+    color: #c8a888;
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+  }
+
+  /* ── TABS ────────────────────────────────────────────────── */
+  nav {
+    display: flex;
+    gap: 0;
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: #c8a888;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  .tab-btn:hover { color: #fdf5e8; }
+
+  .tab-btn.active {
+    color: #fdf5e8;
+    border-bottom-color: var(--accent2);
+    background: rgba(0,0,0,0.15);
+  }
+
+  /* ── MAIN ────────────────────────────────────────────────── */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    color: var(--text-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-intro {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    margin-bottom: 2rem;
+    max-width: 620px;
+  }
+
+  /* ── ALERT ───────────────────────────────────────────────── */
+  .alert {
+    background: #2a1a08;
+    border: 1px solid #5a3010;
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    font-size: 0.85rem;
+    color: #c8a060;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  .alert strong { color: var(--accent2); }
+
+  /* ── PATTERN CARDS ───────────────────────────────────────── */
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pattern-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .pattern-card.nubank::before { background: #8B3B2A; }
+  .pattern-card.mixed::before  { background: var(--accent2); }
+
+  .pattern-card:hover { border-color: #7a4030; }
+
+  .pattern-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .pattern-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    background: var(--surface2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 0.15rem;
+  }
+
+  .pattern-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-bright);
+    flex: 1;
+  }
+
+  .freq-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--moss);
+    color: var(--accent2);
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    border: 1px solid #4a5530;
+  }
+
+  /* ── QUOTE BLOCKS ────────────────────────────────────────── */
+  .quote-block {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.87rem;
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .quote-block p {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-style: italic;
+  }
+
+  .quote-block p::before { content: '\201C'; color: var(--text-dim); margin-right: 0.1rem; }
+  .quote-block p::after  { content: '\201D'; color: var(--text-dim); margin-left: 0.1rem; }
+
+  .quote-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .company-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  /* company tags — mantidas com contraste próprio */
+  .company-tag.nubank    { background: #2a1020; color: #e090c0; }
+  .company-tag.meutudo   { background: #102020; color: #60d0b0; }
+  .company-tag.agibank   { background: #182008; color: #90c840; }
+  .company-tag.inter     { background: #201808; color: #e0a040; }
+  .company-tag.mercantil { background: #200818; color: #e040a0; }
+  .company-tag.caixa     { background: #081828; color: #4090e0; }
+  .company-tag.neon      { background: #081818; color: #40d8d8; }
+  .company-tag.c6        { background: #181808; color: #d8d840; }
+  .company-tag.picpay    { background: #082008; color: #40d870; }
+  .company-tag.creditas  { background: #200808; color: #e05040; }
+  .company-tag.concredito{ background: #100820; color: #a040d8; }
+  .company-tag.capital   { background: #201010; color: #e09090; }
+  .company-tag.ole       { background: #101020; color: #9090d8; }
+  .company-tag.qi        { background: #202008; color: #d8c040; }
+  .company-tag.bb        { background: #080820; color: #5050d8; }
+
+  .quote-date { font-size: 0.72rem; color: var(--text-dim); }
+
+  .quote-source a {
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .quote-source a:hover { text-decoration: underline; }
+
+  .paraphrase-tag {
+    font-size: 0.68rem;
+    background: #2a1a10;
+    color: #a07050;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    border: 1px solid #5a3020;
+  }
+
+  .note-inline {
+    background: var(--moss);
+    border: 1px solid #4a5530;
+    border-radius: 5px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    color: #b0c880;
+    margin-top: 0.75rem;
+  }
+  .note-inline strong { color: var(--accent2); }
+
+  /* ── SUMMARY TABLE ───────────────────────────────────────── */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .summary-table th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  .summary-table tr:hover td { background: var(--surface); }
+
+  .freq-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ── NUBANK SECTION ──────────────────────────────────────── */
+  .nubank-header {
+    background: linear-gradient(135deg, #3a1a10, #2a1008);
+    border: 1px solid #7a3020;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nubank-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    flex-shrink: 0;
+  }
+
+  .nubank-header p { font-size: 0.88rem; color: #c8a888; }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.8rem; }
+    .author-bar { flex-direction: column; align-items: flex-start; }
+  }
+
+  .compare-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .compare-col.pos { border-top: 2px solid var(--success); }
+  .compare-col.neg { border-top: 2px solid var(--danger); }
+
+  .compare-col h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .compare-col.pos h4 { color: var(--success); }
+  .compare-col.neg h4 { color: var(--danger); }
+
+  .compare-item {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .compare-item .icon { flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── PROMPT TAB ──────────────────────────────────────────── */
+  .prompt-box {
+    background: var(--moss);
+    border: 1px solid #4a5530;
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: #c8d8a0;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #3a4428;
+    border: 1px solid #6a7848;
+    color: #a0b870;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  /* ── CAVEATS TAB ─────────────────────────────────────────── */
+  .caveat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .caveat-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .risk-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .risk-high .risk-icon { background: #3a0a08; color: var(--danger);  border: 1px solid var(--danger); }
+  .risk-med  .risk-icon { background: #2a1a08; color: var(--accent2); border: 1px solid #a09060; }
+  .risk-info .risk-icon { background: var(--moss); color: var(--accent3); border: 1px solid #4a5530; }
+
+  .risk-high h3 { color: #e07060; }
+  .risk-med  h3 { color: var(--accent2); }
+  .risk-info h3 { color: var(--accent3); }
+
+  .caveat-card p  { font-size: 0.87rem; color: var(--text); line-height: 1.65; margin-bottom: 0.5rem; }
+  .caveat-card ul { padding-left: 1.25rem; font-size: 0.87rem; line-height: 1.8; color: var(--text); }
+  .caveat-card li { margin-bottom: 0.25rem; }
+
+  .validation-path {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .validation-path h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--success);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .validation-path p, .validation-path li { font-size: 0.83rem; color: #907060; }
+  .validation-path ul { padding-left: 1.25rem; line-height: 1.8; }
+
+  .use-cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .use-case {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .use-case .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+
+  .use-case p { color: var(--text-dim); line-height: 1.5; font-size: 0.82rem; }
+
+  /* ── DIVIDER / FOOTER ────────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 2rem 0; }
+
+  footer {
+    background: var(--moss);
+    border-top: 2px solid #4a5530;
+    text-align: center;
+    padding: 1.25rem;
+    font-size: 0.75rem;
+    color: #8a9870;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  footer a { color: #a0b870; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="author-bar">
+      <span class="author-name">Ana Paula Batista</span>
+      <a class="linkedin-link" href="https://www.linkedin.com/in/anabatista/" target="_blank">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        linkedin
+      </a>
+    </div>
+    <div class="kicker">Pesquisa UX · Produtos Financeiros Digitais · Brasil</div>
+    <h1>Consignado CLT Privado — <em>Análise de Falhas de UX</em></h1>
+    <p class="subtitle">Levantamento de reclamações públicas (2025–2026) · Reclame Aqui · 8 padrões identificados · 10+ relatos</p>
+    <nav>
+      <button class="tab-btn active" onclick="showTab('patterns', this)">Padrões de Falha</button>
+      <button class="tab-btn" onclick="showTab('nubank', this)">Nubank em Foco</button>
+      <button class="tab-btn" onclick="showTab('summary', this)">Síntese</button>
+      <button class="tab-btn" onclick="showTab('prompt', this)">Prompt</button>
+      <button class="tab-btn" onclick="showTab('caveats', this)">Ressalvas e Validação</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ════════════════ PADRÕES ════════════════ -->
+<div id="tab-patterns" class="tab-panel active">
+
+  <div class="alert">
+    <strong>Nota metodológica:</strong> Este levantamento é baseado em páginas públicas indexadas do Reclame Aqui. A amostra é parcial — enviesa para casos que geraram páginas públicas indexáveis. O produto foi lançado em março de 2025, o que limita o volume histórico. Citações diretas são reproduzidas como encontradas (ortografia original preservada). Casos indicados como <em>paráfrase</em> foram reconstituídos a partir de fragmentos.
+  </div>
+
+  <!-- 01 -->
+  <div class="pattern-card mixed">
+    <div class="pattern-header">
+      <span class="pattern-number">01/08</span>
+      <span class="pattern-title">Opacidade de status — "O que aconteceu com minha solicitação?"</span>
+      <span class="freq-badge">4 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>O Nubank não fornece qualquer resposta concreta sobre a solicitação: não informa se foi aprovado ou recusado, não apresenta prazo de análise, não existe canal claro de suporte sobre esse serviço. Fica tudo muito obscuro. O cliente fica sem retorno, sem explicação e sem previsão.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">abr/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/emprestimo-consignado-clt_vjJ1CoAqNNzpI2wt/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>A empresa MEUTUDO que enviou uma proposta de empréstimo, eu aceitei e solicitei, o prazo de pagamento ficou entre os dias [X] e [Y] porém não foi realizado, a empresa não faz nenhum retorno fazendo pouco caso, não atualizam nada no aplicativo.</p>
+      <div class="quote-meta">
+        <span class="company-tag meutudo">meutudo</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/meu-tudo-financeira/consignado-clt_QYVnuA_6phpYQ5MX/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Fiz uma simulação, mandei os dados, assinei os documentos e não tive mais retorno. O dinheiro não caiu, no app da carteira de trabalho...</p>
+      <div class="quote-meta">
+        <span class="company-tag capital">Capital Consig</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/capital-consig/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Empréstimo Consignado CLT Aprovado e Não Creditado na Conta, Dificuldade de Contato com Atendimento. Fiz um empréstimo consignado CLT, foi aprovado, já consta no app da carteira digital e até agora não caiu na minha conta.</p>
+      <div class="quote-meta">
+        <span class="company-tag concredito">ConCrédito</span>
+        <span class="paraphrase-tag">paráfrase</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/concredito/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">02/08</span>
+      <span class="pattern-title">Simulação ≠ compromisso — Usuário não distingue simular de contratar</span>
+      <span class="freq-badge">4 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>Fiz a simulação de um empréstimo consignado CLT pelo Governo Federal, em seguida recebi a proposta de vários bancos e dentre eles o Inter foi o que me interessou, em seguida cliquei no link para continuar com a contratação. Com medo de não conseguir concluir o empréstimo, passei o domingo inteiro tentando finalizar e só dava erro. Hoje tentei novamente e o site continuava com erro e agora para minha surpresa, antes das 9:00 da manhã a proposta desapareceu. Onde foi parar?</p>
+      <div class="quote-meta">
+        <span class="company-tag inter">Inter</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/inter/emprestimo-consignado-clt-governo-federal__OjiWK6p18pFn3q4/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>A gente entra no app carteira de trab digital, fazemos a simulacao e enviamos. Quando recebemos as propostas e clicamos para contratar, somos encaminhados para atendimento via whatsapp. La somos atendidos por uma atendente virtual. Que pede nome e CPF. Depois diz q nao tem no momento proposta de emprestimo. Como nao? Eu recebi so do agibank, 3 propostas!</p>
+      <div class="quote-meta">
+        <span class="company-tag agibank">Agibank</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/agibank/emprestimo-consignado-clt_mB-I8RYAfO7aJnOT/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Fiz um simulado de empréstimo, somente o simulado, e foi debitado o valor em minha conta sem minha permissão contratar.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/nubank/lista-reclamacoes/" target="_blank">↗ Reclame Aqui (listagem)</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>A simulação do crédito não garante a aprovação da proposta, pois todas as solicitações passam por uma análise final baseada em vários critérios internos. Após essa análise, não foi possível disponibilizar a contratação do crédito consignado privado.</p>
+      <div class="quote-meta">
+        <span class="company-tag mercantil">Banco Mercantil</span>
+        <span class="paraphrase-tag">resposta do banco</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/banco-mercantil-do-brasil/consignado-clt_C-7097sF8lV6bz0d/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="note-inline">
+      <strong>⚠ Atenção:</strong> O relato Nubank de "simulei e foi debitado" é potencialmente grave — implica que a UX pode induzir o usuário a contratar sem perceber. Aparece como fragmento de listagem, sem acesso ao relato completo. Registrado com cautela; requer verificação direta.
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">03/08</span>
+      <span class="pattern-title">Feedback ausente após erro — Mensagem genérica, sem causa, sem próximo passo</span>
+      <span class="freq-badge">3 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>Porém, ao tentar continuar com o processo, recebi a seguinte mensagem de erro: "Poxa! Parece que algo deu errado e infelizmente não conseguimos simular o seu consignado." Após isso, não há qualquer opção para falar com um atendente ou resolver o problema. O aplicativo simplesmente retorna à tela inicial sem qualquer explicação ou alternativa.</p>
+      <div class="quote-meta">
+        <span class="company-tag mercantil">Banco Mercantil</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/banco-mercantil-do-brasil/erro-na-simulacao-de-emprestimo-consignado_w8udpi7PrOnnk6GC/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Há vários dias venho tentando utilizar essa opção, mas sempre recebo uma mensagem de erro de conexão. Já autorizei o acesso no aplicativo da Carteira de Trabalho Digital, inclusive outros bancos já apresentaram suas simulações normalmente, exceto o Nubank. [...] Entrei em contato com a central de atendimento pelo chat e fui informado por uma atendente que estava tudo certo com meu cadastro e que a opção estava liberada. Ela apenas me orientou a tentar novamente mais tarde.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/erro-na-simulacao-de-credito-consignado-clt-no-app-do-nubank_2BZ4ipXItdcytLRf/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Estou tentando em todos os canais fazer a contratação do empréstimo consignado CLT e não consigo, sendo que tenho a proposta pela CLT digital, whatsapp não responde, telefone não consigo falar com ninguém o aplicativo do banco da erro, está uma luta.</p>
+      <div class="quote-meta">
+        <span class="company-tag agibank">Agibank</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/agibank/nao-consigo-contratar-credito-consignado-clt_7WjtqUUf3maQTv7K/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">04/08</span>
+      <span class="pattern-title">Opacidade pós-contratação — Desconto ocorre mas o app não reflete</span>
+      <span class="freq-badge">3 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>Fiz o empréstimo do CLT, desconta do meu contracheque mas quando abro o app aparece como se não estivesse descontado tudo, se...</p>
+      <div class="quote-meta">
+        <span class="company-tag meutudo">meutudo</span>
+        <span class="paraphrase-tag">fragmento</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/meu-tudo-financeira/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Fiz o empréstimo CLT pelo banco PicPay já foram descontadas 5 parcelas em folha, o mesmo não atualiza na carteira digital consta somente 2 parcelas pagas. Me informa via chat PicPay que eu deveria mandar um e-mail para o financeiro do PicPay, mas ao solicitar o e-mail encerram o atendimento.</p>
+      <div class="quote-meta">
+        <span class="company-tag picpay">PicPay</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/picpay/emprestimo-consignado-picpay-falta-de-atualizacao-das-parcelas-pagas-e-dificuldade-de-contato_k008R2vCCn8h7tff/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Quitei o contrato com vocês, tenho salvo no extrato aqui o comprovante, mas continuam descontando em folha.</p>
+      <div class="quote-meta">
+        <span class="company-tag creditas">Creditas</span>
+        <span class="paraphrase-tag">paráfrase</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/creditas/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="note-inline">
+      <strong>Contexto técnico:</strong> O lag entre desconto em folha e atualização no app é parcialmente estrutural (ciclo Dataprev/eSocial). A falha de UX está na ausência de comunicação proativa sobre esse lag.
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">05/08</span>
+      <span class="pattern-title">Portabilidade inacessível — Direito existe, UX impede o exercício</span>
+      <span class="freq-badge">4 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>O nubank esta se recusando a passar o contrato pra eles. Ja entrei em contato com o nubank e nao consegui resolver. [...] O nubank esta aplicando algo que nao é permitido, reter um contrato de dívida pra si. Quero que enviem meu contrato pra eles.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">out/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/nubank-dificulta-portabilidade-de-emprestimo-consignado-para-outro-banco_so6Dgn8EgTkgFs2E/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Na semana passada fiz o pedido de portabilidade dos meus empréstimos consignados do nubank para outra financeira chamada finanto e acontece que hoje o nubank disse que eu pedi pra cancelar e eu não pedi nada. O outro banco ia me liberar um troco e agora por conta disso não vou conseguir porque o nubank reteu meus contratos.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">ago/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/portabilidade-de-emprestimo-consignado-negada-indevidamente_QUbFGnwVgfRFlbNe/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Tenho um empréstimo consignado antigo com a Neon, estou na tentativa de refinanciamento e portabilidade desde dia 06/06/2025 conforme autorizado no novo Clt trabalhador, mas a Neon, está informado que não está autorizado pelo governo.</p>
+      <div class="quote-meta">
+        <span class="company-tag neon">Neon/ConsigaMais</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/consiga-mais/dificuldade-em-refinanciar-e-portar-emprestimo-consignado_diQ87FUzZFtxiIsL/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>A tentativa de impor exclusividade ao Nubank fere o princípio da livre concorrência, previsto no artigo 170 da Constituição Federal [...]. Solicito a retirada imediata de qualquer impedimento ou anotação interna que esteja bloqueando a liberação da minha margem consignável para contratação de empréstimo CLT com outro banco.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/impedimento-indevido-de-emprestimo-consignado-clt_IZ8YAVJKtwg-MfU3/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">06/08</span>
+      <span class="pattern-title">Suporte que não resolve — Bot ou 0800 sem saída para humano</span>
+      <span class="freq-badge">4 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>passei um dia inteiro tentando falar com eles porém o WhatsApp que seria para auxiliar os clientes fica dando opção apenas de robô, depois de várias tentativas sem sucesso, consegui através de outra opção na mesma ura aguardar por um atendimento.</p>
+      <div class="quote-meta">
+        <span class="company-tag qi">QI Tech / Paketa</span>
+        <span class="quote-date">abr/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/qi-sociedade-de-credito/credito-consignado-clt-credito-do-trabalhador_0dgrnubmkCjqNloS/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Entrei em contato com a c6 pelo chat e não conseguiram me informar como proceder mas me passaram o numero da central, liguei e o robô não conseguiu me auxiliar e não tinha como falar com atendente. Preciso fazer a portabilidade e ninguém soube me instruir ou me ajudar precisei pesquisar em como proceder!!!</p>
+      <div class="quote-meta">
+        <span class="company-tag c6">C6 Consig</span>
+        <span class="quote-date">dez/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/c6-consig/dificuldade-na-portabilidade-de-emprestimo-consignado-apos-mudanca-de-emprego_lK83pSEvZkt2uTZx/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Fiz a simulação no app carteira digital e o Bb me enviou uma proposta, quando vou para contratar me direciona para criar conta no banco, assim eu fiz! Ao seguir o passo a passo orienta ir na opção empréstimo e finalizar o pedido de contratação, porém não existe a opção informada, não consigo concluir meu acordo, preciso de um suporte, e só falo com robô!</p>
+      <div class="quote-meta">
+        <span class="company-tag bb">Banco do Brasil</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/banco-do-brasil/emprestimo-consignado-clt_PF_KvFrJuT4VeeEf/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Eu tenho um empréstimo consignado do Olé e recebi proposta de portabilidade. Porém, acho mais viável refinanciamento pelo próprio banco. Mas é impossível falar com a central de atendimento. Em todos os canais, voz e WhatsApp, sou atendida por robô e inteligência artificial. Quero falar com um operador.</p>
+      <div class="quote-meta">
+        <span class="company-tag ole">Olé Consignado</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/ole-consignado/central-de-atendimento_zh49vhRVdHHIT390/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">07/08</span>
+      <span class="pattern-title">Proposta fantasma — Oferta recebida que desaparece ou nunca existiu</span>
+      <span class="freq-badge">3 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>Recebi diversas propostas da caixa para contratar o empréstimo consignado CLT, como todo Brasileiro endividado ao receber a proposta de um dos maiores bancos do brasil certamente ficamos contentes e felizes, porém ao tentar contratar o crédito eles solicitam que procuremos uma agencia e fazem uma analise de crédito e nega na hora para quem está negativado. [...] Já que não vão fazer o empréstimo para nós negativados, para de mandar propostas, dar falsas esperanças ao povo.</p>
+      <div class="quote-meta">
+        <span class="company-tag caixa">Caixa Econômica</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/caixa-economica-federal/emprestimo-consignado-clt-pela-caixa-e-so-humilhacao-para-quem-esta-negativado_A4COnL9w7IVtMZw5/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Com medo de não conseguir concluir o empréstimo, passei o domingo inteiro tentando finalizar e só dava erro. Hoje tentei novamente e o site continuava com erro e agora para minha surpresa, antes das 9:00 da manhã a proposta desapareceu.</p>
+      <div class="quote-meta">
+        <span class="company-tag inter">Inter</span>
+        <span class="paraphrase-tag">paráfrase</span>
+        <span class="quote-date">mar/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/inter/emprestimo-consignado-clt-governo-federal__OjiWK6p18pFn3q4/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>A gente [...] fazemos a simulacao e enviamos. Quando recebemos as propostas e clicamos para contratar, somos encaminhados para atendimento via whatsapp. La somos atendidos por uma atendente virtual [...]. Depois diz q nao tem no momento proposta de emprestimo. Como nao?</p>
+      <div class="quote-meta">
+        <span class="company-tag agibank">Agibank</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/agibank/emprestimo-consignado-clt_mB-I8RYAfO7aJnOT/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="pattern-card">
+    <div class="pattern-header">
+      <span class="pattern-number">08/08</span>
+      <span class="pattern-title">Desconto duplo ou pós-quitação — Averbação falhou, comunicação também</span>
+      <span class="freq-badge">3 relatos</span>
+    </div>
+    <div class="quote-block">
+      <p>Descontos 2 vezes no mes emprestimo consignado CLT.</p>
+      <div class="quote-meta">
+        <span class="company-tag meutudo">meutudo</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/meu-tudo-financeira/descontos-2-vezes-no-mes-emprestimo-consignado-clt_uqvwca_DHP02xt09/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Já quitei um empréstimo e continuam descontando do meu contracheque, já entrei em contato com eles e até agora não me reembolsaram.</p>
+      <div class="quote-meta">
+        <span class="company-tag meutudo">meutudo</span>
+        <span class="paraphrase-tag">fragmento</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/meu-tudo-financeira/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>Quitei o contrato com vocês, tenho salvo no extrato aqui o comprovante, mas continuam descontando em folha.</p>
+      <div class="quote-meta">
+        <span class="company-tag creditas">Creditas</span>
+        <span class="paraphrase-tag">paráfrase</span>
+        <span class="quote-date">2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/empresa/creditas/lista-reclamacoes/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="note-inline">
+      <strong>Contexto técnico:</strong> Quitações feitas após o dia 15 do mês entram na folha do mês seguinte por causa do ciclo de fechamento eSocial/Dataprev — comportamento previsto em contrato. A falha de UX é não comunicar isso proativamente ao usuário no momento da quitação.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ NUBANK ════════════════ -->
+<div id="tab-nubank" class="tab-panel">
+  <div class="nubank-header">
+    <div class="nubank-dot"></div>
+    <p>5 relatos distintos identificados, abrangendo 4 dos 8 padrões mapeados. O Nubank aparece como o player com maior variedade de padrões de falha — mas também com tempo de resposta relativo melhor que a maioria dos concorrentes.</p>
+  </div>
+
+  <h2>Padrões específicos do Nubank</h2>
+  <p class="section-intro">Reclamações públicas identificadas no Reclame Aqui com citações diretas de usuários do produto Nubank Consignado CLT.</p>
+
+  <div class="pattern-card nubank">
+    <div class="pattern-header"><span class="pattern-title">Opacidade de status — "Fica tudo muito obscuro"</span></div>
+    <div class="quote-block">
+      <p>Solicitei um empréstimo consignado CLT pelo Nubank, atendendo a todos os critérios exigidos: Sou registrado em carteira (CLT), tenho margem consignável disponível, documentação correta, vínculo empregatício ativo. O problema é que o Nubank não fornece qualquer resposta concreta sobre a solicitação: Não informa se foi aprovado ou recusado. Não apresenta prazo de análise. Não existe canal claro de suporte sobre esse serviço. Fica tudo muito obscuro.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">abr/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/emprestimo-consignado-clt_vjJ1CoAqNNzpI2wt/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern-card nubank">
+    <div class="pattern-header"><span class="pattern-title">Erro sem causa + suporte circular — "Tentar novamente mais tarde"</span></div>
+    <div class="quote-block">
+      <p>Há vários dias venho tentando utilizar essa opção, mas sempre recebo uma mensagem de erro de conexão. Já autorizei o acesso no aplicativo da Carteira de Trabalho Digital, inclusive outros bancos já apresentaram suas simulações normalmente, exceto o Nubank. No próprio app do Nubank aparece a opção informando que a simulação está disponível, mas não consigo prosseguir por causa do erro. Entrei em contato com a central de atendimento pelo chat e fui informado por uma atendente que estava tudo certo com meu cadastro e que a opção estava liberada. Ela apenas me orientou a tentar novamente mais tarde. No entanto, continuo tentando por dias e o erro persiste.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/erro-na-simulacao-de-credito-consignado-clt-no-app-do-nubank_2BZ4ipXItdcytLRf/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern-card nubank">
+    <div class="pattern-header"><span class="pattern-title">Portabilidade bloqueada — Alegação de prática abusiva</span></div>
+    <div class="quote-block">
+      <p>A tentativa de impor exclusividade ao Nubank fere o princípio da livre concorrência, previsto no artigo 170 da Constituição Federal, e o meu direito como consumidora de escolher o melhor serviço para meu perfil. De acordo com o Código de Defesa do Consumidor (CDC), artigo 39, inciso I, é considerada prática abusiva condicionar o fornecimento de um serviço à recusa de outro.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">jul/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/impedimento-indevido-de-emprestimo-consignado-clt_IZ8YAVJKtwg-MfU3/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <p>O nubank esta se recusando a passar o contrato pra eles. [...] O nubank esta aplicando algo que nao é permitido, reter um contrato de dívida pra si. Quero que enviem meu contrato pra eles. Para que eles possam quitar o mais rápido possível.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="quote-date">out/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/nubank-dificulta-portabilidade-de-emprestimo-consignado-para-outro-banco_so6Dgn8EgTkgFs2E/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern-card nubank">
+    <div class="pattern-header"><span class="pattern-title">Empréstimo pessoal "contaminando" o consignado CLT</span></div>
+    <div class="quote-block">
+      <p>O sistema atua de forma automatizada, priorizando a sua segurança e controle financeiro. [resposta Nubank] [...] Notamos a ausência de pagamento da primeira parcela do empréstimo mencionado desde 07/2024 e por isso permanecem os reportes dos valores vencidos no SCR. Cabe esclarecer que, para a liberação de nova simulação ou contratação de empréstimos via gov.br, é necessário que haja margem consignável disponível.</p>
+      <div class="quote-meta">
+        <span class="company-tag nubank">Nubank</span>
+        <span class="paraphrase-tag">resposta do banco</span>
+        <span class="quote-date">mai/2025</span>
+        <span class="quote-source"><a href="https://www.reclameaqui.com.br/nubank/emprestimo-clt-negado-devido-a-erro-nubank_DvtfpvM9ySrs5SUT/" target="_blank">↗ Reclame Aqui</a></span>
+      </div>
+    </div>
+    <div class="note-inline">Caso específico do Nubank: contratos de crédito pessoal sendo registrados no Dataprev como consignado, bloqueando nova contratação de consignado CLT. O usuário não tem visibilidade ou controle sobre esse impedimento via app.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h2>Comparativo com concorrentes</h2>
+  <p class="section-intro">O que o Nubank faz de forma diferente — positivamente e negativamente — em relação ao mercado de consignado CLT privado.</p>
+
+  <div class="compare-grid">
+    <div class="compare-col pos">
+      <h4>✦ Positivo (relativo ao mercado)</h4>
+      <div class="compare-item"><span class="icon">📱</span><span><strong>Tempo de resposta:</strong> ~5 dias no Reclame Aqui, vs. 9 dias (meutudo), 18 dias (Creditas), sem resposta (vários menores).</span></div>
+      <div class="compare-item"><span class="icon">📄</span><span><strong>Transparência contratual:</strong> Contrato público explicita o direito de portabilidade (Resolução BCB 5.057) — mesmo que a prática contradiga o texto em vários relatos.</span></div>
+      <div class="compare-item"><span class="icon">💬</span><span><strong>Canal in-app:</strong> Chat nativo no app para o produto, ausente em Agibank, Paketa e Olé/Santander.</span></div>
+      <div class="compare-item"><span class="icon">📖</span><span><strong>Documentação educacional:</strong> Blog com conteúdo detalhado sobre simulação, portabilidade e margem.</span></div>
+    </div>
+    <div class="compare-col neg">
+      <h4>✦ Negativo (específico ou mais grave)</h4>
+      <div class="compare-item"><span class="icon">🔒</span><span><strong>Portabilidade como gargalo:</strong> 3 de 4 relatos de bloqueio de portabilidade são contra o Nubank — pode indicar política ativa de retenção.</span></div>
+      <div class="compare-item"><span class="icon">⚠️</span><span><strong>Crédito pessoal bloqueando consignado:</strong> Padrão único ao Nubank nos dados coletados.</span></div>
+      <div class="compare-item"><span class="icon">🔄</span><span><strong>Rollout gradual sem aviso:</strong> A resposta padrão a erros é "produto sendo liberado aos poucos" — não comunicado proativamente no app.</span></div>
+      <div class="compare-item"><span class="icon">📊</span><span><strong>Ausência de status em tempo real:</strong> Sem rastreamento claro do status da solicitação em análise.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SÍNTESE ════════════════ -->
+<div id="tab-summary" class="tab-panel">
+  <h2>Síntese dos padrões</h2>
+  <p class="section-intro">Frequência observada por padrão e distribuição entre empresas.</p>
+
+  <table class="summary-table">
+    <thead>
+      <tr><th>#</th><th>Padrão de falha</th><th>Relatos</th><th>Empresas afetadas</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">01</span></td><td>Opacidade de status</td><td><span class="freq-num">4</span></td><td><span class="company-tag nubank">Nubank</span> <span class="company-tag meutudo">meutudo</span> <span class="company-tag capital">Capital Consig</span> <span class="company-tag concredito">ConCrédito</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">02</span></td><td>Simulação ≠ compromisso</td><td><span class="freq-num">4</span></td><td><span class="company-tag inter">Inter</span> <span class="company-tag agibank">Agibank</span> <span class="company-tag mercantil">Mercantil</span> <span class="company-tag nubank">Nubank</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">03</span></td><td>Feedback ausente após erro</td><td><span class="freq-num">3</span></td><td><span class="company-tag mercantil">Mercantil</span> <span class="company-tag nubank">Nubank</span> <span class="company-tag agibank">Agibank</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">04</span></td><td>Opacidade pós-contratação</td><td><span class="freq-num">3</span></td><td><span class="company-tag meutudo">meutudo</span> <span class="company-tag picpay">PicPay</span> <span class="company-tag creditas">Creditas</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">05</span></td><td>Portabilidade inacessível</td><td><span class="freq-num">4</span></td><td><span class="company-tag nubank">Nubank ×3</span> <span class="company-tag neon">Neon</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">06</span></td><td>Suporte que não resolve</td><td><span class="freq-num">4</span></td><td><span class="company-tag qi">QI Tech</span> <span class="company-tag c6">C6</span> <span class="company-tag bb">BB</span> <span class="company-tag ole">Olé</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">07</span></td><td>Proposta fantasma</td><td><span class="freq-num">3</span></td><td><span class="company-tag caixa">Caixa</span> <span class="company-tag inter">Inter</span> <span class="company-tag agibank">Agibank</span></td></tr>
+      <tr><td><span style="font-family:JetBrains Mono;font-size:0.75rem;color:var(--text-dim)">08</span></td><td>Desconto duplo / pós-quitação</td><td><span class="freq-num">3</span></td><td><span class="company-tag meutudo">meutudo ×2</span> <span class="company-tag creditas">Creditas</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="divider"></div>
+  <h3>Observação estrutural</h3>
+  <div class="alert">
+    A maioria dos padrões identificados envolve fricção na camada <strong>CTPS Digital → banco → Dataprev/eSocial</strong>. O produto é um sistema multi-agente com responsabilidade fragmentada: falhas em um elo geram reclamações contra outro. Isso complica tanto o diagnóstico quanto a atribuição de responsabilidade de UX — e é campo fértil para dark patterns por omissão.
+  </div>
+</div>
+
+<!-- ════════════════ PROMPT ════════════════ -->
+<div id="tab-prompt" class="tab-panel">
+  <h2>Prompt</h2>
+  <p class="section-intro">Texto exato do prompt utilizado para gerar este levantamento.</p>
+
+  <div style="position:relative">
+    <div class="prompt-box" id="promptText">Você é um pesquisador de UX especializado em produtos financeiros digitais no Brasil. Sua tarefa é coletar e analisar reclamações públicas de usuários de apps de crédito consignado privado (CLT) no Brasil, publicadas em 2024, 2025 ou 2026. FONTES PARA BUSCAR:
+
+* Reclame Aqui: Nubank, Neon/ConsigaMais, Creditas, meutudo, iCred
+* Procon-SP (se houver dados públicos indexados)
+* Consumidor.gov.br (se houver dados indexados)
+* Cobertura jornalística de reclamações (G1, CNN Brasil, Poder360, UOL) PROCESSO:
+
+1. Busque reclamações reais e citações diretas de usuários sobre consignado CLT privado
+2. Colete pelo menos 10 relatos distintos, de fontes diferentes quando possível
+3. Para cada relato, anote: fonte, empresa, data aproximada, e a frase exata ou paráfrase próxima ANÁLISE: Depois de coletar, agrupe os relatos pelos seguintes padrões de falha de UX:
+
+* Opacidade de status (usuário não sabe o que aconteceu com sua solicitação)
+* Simulação ≠ compromisso (usuário não entende a diferença entre simular e contratar)
+* Feedback ausente após erro (mensagem de erro sem causa e sem próximo passo)
+* Opacidade pós-contratação (desconto acontece mas app não reflete)
+* Portabilidade inacessível (direito existe mas UX impede o exercício)
+* Suporte que não resolve (IA de atendimento ou 0800 sem solução)
+* Outros padrões que você encontrar FORMATO DE SAÍDA: Para cada padrão encontrado: [Nome do padrão]
+"[Citação direta ou paráfrase próxima do usuário]" — Empresa, fonte, data "[Segundo relato se houver]" — Empresa, fonte, data Frequência observada: [quantos relatos distintos encontrou para este padrão] Ao final, uma seção: Padrões específicos do Nubank consignado CLT: [Mesmo formato, focado no Nubank] O que o Nubank faz diferente dos concorrentes (positivo e negativo): [Comparativo sucinto] Seja preciso com as citações. Se não encontrar citação direta, indique "paráfrase" explicitamente. Inclua links das fontes quando disponível.</div>
+    <button class="copy-btn" onclick="copyPrompt()">copiar</button>
+  </div>
+</div>
+
+<!-- ════════════════ RESSALVAS ════════════════ -->
+<div id="tab-caveats" class="tab-panel">
+  <h2>Ressalvas e como validar</h2>
+  <p class="section-intro">Riscos de usar este levantamento sem validação adicional, caminhos de validação e usos legítimos desta pesquisa.</p>
+
+  <div class="caveat-card risk-high">
+    <h3><span class="risk-icon">!</span> Viés de amostragem — Risco alto</h3>
+    <p>O Reclame Aqui agrega apenas usuários que (1) tiveram problema, (2) souberam da plataforma, (3) decidiram reclamar publicamente. Usuários satisfeitos ou que resolveram o problema por outro canal não aparecem. A taxa de reclamações como proporção da base de clientes é desconhecida — o que parece "muita reclamação" pode ser insignificante em base de milhões de usuários.</p>
+    <div class="validation-path">
+      <h4>Como validar</h4>
+      <ul>
+        <li>Confrontar com o índice de resolução e nota geral de cada empresa no Reclame Aqui (dado público).</li>
+        <li>Buscar dados do Bacen (Relatório de Ouvidorias das Instituições Financeiras) para volume proporcional de reclamações regulatórias.</li>
+        <li>Conduzir pesquisa quantitativa própria (survey) com usuários do produto para medir prevalência.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="caveat-card risk-high">
+    <h3><span class="risk-icon">!</span> Relatos sem verificação — Risco alto</h3>
+    <p>As citações são autodeclaradas. O usuário pode ter omitido etapas, mal interpretado o fluxo, ou narrado o problema de forma inexata. A versão do banco (nas respostas públicas) frequentemente diverge da narrativa do usuário — e ambas podem ser parcialmente corretas. Alguns casos podem envolver fraude ou uso indevido pelo próprio usuário.</p>
+    <div class="validation-path">
+      <h4>Como validar</h4>
+      <ul>
+        <li>Para cada padrão identificado, conduzir testes de usabilidade observacionais (pensamento em voz alta) com usuários reais do segmento.</li>
+        <li>Solicitar ao banco os dados internos de erros e abandonos de funil (se houver acesso privilegiado como pesquisador/parceiro).</li>
+        <li>Mapear o fluxo real nos apps para verificar se o padrão de falha é reproduzível.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="caveat-card risk-med">
+    <h3><span class="risk-icon">~</span> Produto muito recente — Risco médio</h3>
+    <p>O Crédito do Trabalhador foi lançado em março de 2025. Parte dos problemas identificados pode ser ruído de lançamento — bugs de integração, curva de aprendizado dos times de produto — já resolvidos. Relatos de meados de 2025 podem não refletir o estado atual dos apps (mai/2026).</p>
+    <div class="validation-path">
+      <h4>Como validar</h4>
+      <ul>
+        <li>Verificar se o padrão de reclamação diminui ao longo do tempo (análise de série temporal no Reclame Aqui — dado público).</li>
+        <li>Testar os fluxos atuais nos apps para verificar quais erros ainda são reproduzíveis.</li>
+        <li>Checar changelogs públicos e release notes dos apps.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="caveat-card risk-med">
+    <h3><span class="risk-icon">~</span> Cobertura parcial de empresas — Risco médio</h3>
+    <p>O levantamento focou nas empresas do prompt original (Nubank, Neon, Creditas, meutudo, iCred) e expandiu para casos encontrados organicamente. Players como iCred, BMG, Bradesco e Itaú praticamente não aparecem — não porque não têm problemas, mas porque as buscas não os retornaram com frequência. A ausência de dados não é evidência de ausência de problemas.</p>
+    <div class="validation-path">
+      <h4>Como validar</h4>
+      <ul>
+        <li>Realizar buscas diretas no Reclame Aqui para cada empresa individualmente.</li>
+        <li>Consultar o Bacen para share de reclamações por instituição na categoria "crédito consignado privado".</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="caveat-card risk-info">
+    <h3><span class="risk-icon">i</span> Confusão entre falha do banco e falha do sistema — Risco informacional</h3>
+    <p>O consignado CLT é um sistema multi-agente: CTPS Digital (MTE), eSocial, Dataprev, empregador, banco. Vários dos problemas identificados têm origem em fricções entre essas camadas, não exclusivamente no design do app do banco. Atribuir responsabilidade sem mapear o sistema completo pode levar a recomendações de design equivocadas.</p>
+    <div class="validation-path">
+      <h4>Como validar</h4>
+      <ul>
+        <li>Mapear o service blueprint completo da jornada antes de propor intervenções de UX.</li>
+        <li>Identificar quais pontos de falha são controlados pelo banco vs. pelo sistema gov.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Para que esta pesquisa serve</h3>
+  <p class="section-intro" style="margin-bottom:1rem">Usos legítimos para este levantamento, considerando suas limitações.</p>
+
+  <div class="use-cases">
+    <div class="use-case">
+      <div class="label">✓ Exploratório</div>
+      <p>Geração de hipóteses para pesquisa quantitativa posterior. Identificar quais padrões investigar com métodos mais rigorosos.</p>
+    </div>
+    <div class="use-case">
+      <div class="label">✓ Desk research</div>
+      <p>Complementar revisão de literatura sobre dark patterns em fintech ou sobre problemas de onboarding em produtos financeiros.</p>
+    </div>
+    <div class="use-case">
+      <div class="label">✓ Roteiro de usabilidade</div>
+      <p>Definir tarefas e cenários para testes com usuários — cada padrão é um caso de teste potencial.</p>
+    </div>
+    <div class="use-case">
+      <div class="label">✓ Briefing de design</div>
+      <p>Comunicar a uma equipe de produto quais gaps de UX merecem investigação prioritária — com a ressalva de que são hipóteses, não diagnósticos confirmados.</p>
+    </div>
+    <div class="use-case">
+      <div class="label">✗ Conclusivo</div>
+      <p>Não use para afirmar que "X% dos usuários enfrentam problema Y" ou para comparar empresas de forma definitiva sem dados proporcionais.</p>
+    </div>
+    <div class="use-case">
+      <div class="label">✗ Regulatório / jurídico</div>
+      <p>Relatos autodeclarados não têm valor probatório. Para fins regulatórios, usar dados do Bacen, Consumidor.gov.br e Procon com acesso formal.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Consignado CLT · Análise UX · mai/2026 · Ana Paula Batista ·
+  <a href="https://www.linkedin.com/in/anabatista/" target="_blank">linkedin.com/in/anabatista</a> ·
+  Fontes: Reclame Aqui (público) · Produzido com Claude Sonnet 4.6
+</footer>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById('promptText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'copiado ✓';
+      setTimeout(() => btn.textContent = 'copiar', 2000);
+    });
+  }
+</script>
+</body>
+</html>
